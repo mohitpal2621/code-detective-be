@@ -11,3 +11,55 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  USER
+  TRUSTED_CONTRIBUTOR
+  MODERATOR
+  ADMIN
+}
+
+model User {
+  id          String   @id @default(uuid())
+  clerkUserId String   @unique
+  email       String   @unique
+  username    String   @unique
+  role        UserRole @default(USER)
+  reputation  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attempts Attempt[]
+}
+
+model Challenge {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  language    String
+  difficulty  String
+  prompt      String
+  code        String
+  bugLine     Int
+  bugCategory String
+  explanation String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attempts Attempt[]
+}
+
+model Attempt {
+  id               String   @id @default(uuid())
+  userId           String
+  challengeId      String
+  selectedLine     Int
+  selectedCategory String
+  isCorrect        Boolean
+  score            Int
+  timeMs           Int
+  createdAt        DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+}
